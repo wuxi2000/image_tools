@@ -1,49 +1,72 @@
 import requests
+import threading
 import os
 
-HOME_DIR = r'C:\Users\wuxi2\Documents\GitSandbox.temp\python\image_tools'
+# HOME_DIR = r'C:\Users\wuxi2\Documents\GitSandbox.temp\python\image_tools'
+# HOME_DIR = r'C:\Users\xi.wu\Documents\GitSandBox\python\image_tools'
 
-FOLDER_LIST = [
+BOOK_ID_LIST = [
     '2000581', '1985334', '1563958'
 ]
-
 
 # ##############################
 # functions
 
-def makeRemoteUrl(item, sequence):
-    return item.format(sequence)
+def makeRemoteUrl(bookId, seq):
+    urlTemplate = 'https://i.nhentai.net/galleries/{bookId}/{seq}.jpg'
+    urlTemplate.format(bookId=bookId, seq=seq)
+    return urlTemplate
 
-def downloadImageFile(url, localPath):
-    dir = os.path.dirname(os.path.normpath(localPath))
-    if not os.path.exists(dir):
-        os.mkdir(dir)
+def downloadImage(url, localPath):
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            print(f'error:{response.status_code}, {url}')
+            return False
 
-    response = requests.get(url)
-    if response.status_code != 200:
-        print(f'error:{response.status_code}, {url}')
+        image = response.content
+        with open(localPath, "wb") as f:
+            f.write(image)
+
+        return True
+
+    except Exception as e:
+        print(f'error in download {url}, {e}')
         return False
 
-    image = response.content
-    with open(localPath, "wb") as f:
-        f.write(image)
+def downloadFolder(bookId, localDir):
+    print(f'{bookId} download start {localDir}')
 
-    return True
+    dir = os.path.join(localDir, bookId)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+    counter = 0
+    errorCounter = 0
+    for i in range(1, 200):
+        localFilename = os.path.join(localDir, bookId, f'{str(i)}.jpg')
+        url = makeRemoteUrl(bookId, str(i))
+        sts = downloadImage(url, localFilename)
+        if not sts:
+            errorCounter += 1
+            if errorCounter > 3:
+                break
+
+        counter += 1
+
+    print(f'{bookId} download finish, pages={counter}')
+    return
 
 def main():
-    for folder in FOLDER_LIST:
-        errorCounter = 0
-        for i in range(1, 200):
-            sequence = str(i)
-            print(f'{folder},{sequence}')
-            url = 'https://i.nhentai.net/galleries/{}/{}.jpg'.format(folder, sequence)
-            localPath = f'{HOME_DIR}/data/{folder}/{sequence}.jpg'
-            sts = downloadImageFile(url, localPath)
-            if not sts:
-                errorCounter += 1
-                if errorCounter > 3:
-                    break
+    print(f'>>> start bookIds={len(BOOK_ID_LIST)}')
 
+    localDir = os.path.join(os.getcwd(), 'data')
+    for bookId in BOOK_ID_LIST:
+        thread = threading.Thread(target=downloadFolder, args=(bookId, localDir))
+        thread.start()
+        thread.join()
+
+    print('<<< finished')
     return
 
 
