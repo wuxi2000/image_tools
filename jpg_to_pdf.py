@@ -3,8 +3,6 @@ import PyPDF2
 from PIL import Image
 import img2pdf
 
-HOME_DIR = r'C:\Users\wuxi2\Documents\GitSandbox.temp\python\image_tools'
-
 def jpg2pdf(jpgFilename, pdfFilename):
     img = Image.open(jpgFilename)
     pdf = img2pdf.convert(jpgFilename)
@@ -36,7 +34,7 @@ def jpg2pdfByFolder(folder):
     mergepdfs(pdfFileList, os.path.join(folder, f'{folder}.pdf'))
 
 def main():
-    imgDir = os.path.join(HOME_DIR, 'data/')
+    imgDir = os.path.join(os.getcwd(), 'data/')
     allDirs = sorted(os.listdir(imgDir))
     dirs = [f for f in allDirs if os.path.isdir(os.path.join(imgDir, f))]
     for dir in dirs:

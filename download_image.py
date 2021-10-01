@@ -11,14 +11,12 @@ BOOK_ID_LIST = [
 
 def makeRemoteUrl(bookId, seq):
     urlTemplate = 'https://i.nhentai.net/galleries/{bookId}/{seq}.jpg'
-    urlTemplate.format(bookId=bookId, seq=seq)
-    return urlTemplate
+    return urlTemplate.format(bookId=bookId, seq=seq)
 
 def downloadImage(url, localPath):
     try:
         response = requests.get(url)
         if response.status_code != 200:
-            print(f'error:{response.status_code}, {url}')
             return False
 
         image = response.content
@@ -28,7 +26,6 @@ def downloadImage(url, localPath):
         return True
 
     except Exception as e:
-        print(f'error in download {url}, {e}')
         return False
 
 def downloadFolder(bookId, localDir):
@@ -44,12 +41,12 @@ def downloadFolder(bookId, localDir):
         localFilename = os.path.join(localDir, bookId, f'{str(i)}.jpg')
         url = makeRemoteUrl(bookId, str(i))
         sts = downloadImage(url, localFilename)
-        if not sts:
+        if sts:
+            counter += 1
+        else:
             errorCounter += 1
             if errorCounter > 3:
                 break
-
-        counter += 1
 
     print(f'{bookId} download finish, pages={counter}')
     return
@@ -57,10 +54,14 @@ def downloadFolder(bookId, localDir):
 def main():
     print(f'>>> start bookIds={len(BOOK_ID_LIST)}')
 
+    threadList = []
     localDir = os.path.join(os.getcwd(), 'data')
     for bookId in BOOK_ID_LIST:
         thread = threading.Thread(target=downloadFolder, args=(bookId, localDir))
         thread.start()
+        threadList.append(thread)
+
+    for thread in threadList:
         thread.join()
 
     print('<<< finished')
