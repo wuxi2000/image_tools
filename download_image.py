@@ -4,7 +4,7 @@ import os
 HOME_DIR = r'C:\Users\wuxi2\Documents\GitSandbox.temp\python\image_tools'
 
 FOLDER_LIST = [
-    '1967794'
+    '2000581', '1985334', '1563958'
 ]
 
 
