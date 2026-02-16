@@ -2,7 +2,6 @@ from loguru import logger
 import requests
 import threading
 import os
-import shutil
 
 # ##############################
 # consts
@@ -16,18 +15,16 @@ EXT_NAME_LIST = ['jpg','webp', 'png']
 MULTI_THREAD_MODE = True
 
 # ##############################
-# initialize logger
-# ##############################
-
-logger.add(
-    LOG_FILE, 
-    level="DEBUG",
-    format='{time:HH:mm:ss.SSS}|{level: <8}|{function}:{line} - {message}'
-)
-
-# ##############################
 # functions
 # ##############################
+
+def init_logger():
+    logger.add(
+        LOG_FILE, 
+        level="DEBUG",
+        format='{time:HH:mm:ss.SSS}|{level: <8}|{function}:{line} - {message}'
+    )
+
 
 def read_book_url_list():
     list_file_path = INPUT_BOOK_URL_LIST_FILE
@@ -47,8 +44,8 @@ def anzlyze_book_url(book_url):
     second_last_slash_index = book_url.rfind('/', 0, last_slash_index)
 
     folder_name = book_url[second_last_slash_index+1 : last_slash_index]
-    page_url_template = book_url[0: last_slash_index+1] + '{page_id}' + '.' + '{ext_name}'
-    filename_template = '{page_id}' + '.' + '{ext_name}'
+    page_url_template = book_url[0: last_slash_index+1] + '{page_no}' + '.' + '{ext_name}'
+    filename_template = '{page_no}' + '.' + '{ext_name}'
 
     return folder_name, page_url_template, filename_template
 
@@ -84,10 +81,9 @@ def download_book(book_url):
     for i in range(1, MAX_PAGE_NO):
 
         successed = False
-
         for ext_name in EXT_NAME_LIST:
-            page_url = page_url_template.replace('{page_id}', str(i)).replace('{ext_name}', ext_name)
-            local_file_name = filename_template.replace('{page_id}', str(i)).replace('{ext_name}', ext_name)
+            page_url = page_url_template.replace('{page_no}', str(i)).replace('{ext_name}', ext_name)
+            local_file_name = filename_template.replace('{page_no}', str(i)).replace('{ext_name}', ext_name)
             local_file_path = os.path.join(local_folder, local_file_name)
 
             sts = download_single_file(page_url, local_file_path)
@@ -110,9 +106,7 @@ def download_book(book_url):
     return
 
 def main():
-
     book_url_list = read_book_url_list()
-
     logger.info(f'{len(book_url_list)} : START')
 
     if MULTI_THREAD_MODE:
@@ -137,4 +131,5 @@ def main():
 # ##############################
 
 if __name__ == '__main__':
+    init_logger()
     main()
