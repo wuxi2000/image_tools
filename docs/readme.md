@@ -1,5 +1,9 @@
 # libraries
 
+pip install requests
+
+pip install loguru
+
 pip install opencv-python
 -> numpy             1.20.2
 -> opencv-python     4.5.1.48
