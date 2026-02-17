@@ -35,7 +35,7 @@ def read_book_url_list():
 
     return book_urls
 
-def anzlyze_book_url(book_url):
+def analyze_book_url(book_url):
     folder_name = '' 
     page_url_template = ''
     filename_template = ''
@@ -70,7 +70,7 @@ def download_single_file(remote_url, local_file_path):
 
 def download_book(book_url):
     logger.info(f'{book_url} : START')
-    folder_name, page_url_template, filename_template = anzlyze_book_url(book_url)
+    folder_name, page_url_template, filename_template = analyze_book_url(book_url)
 
     local_folder = os.path.join(OUTPUT_IMAGE_FOLDER, folder_name)
     if not os.path.exists(local_folder):
